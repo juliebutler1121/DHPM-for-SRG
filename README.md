@@ -2,7 +2,7 @@
 ## Table of Contents
 Abstract
 
-Introduction to Machine Learning  \\
+Introduction to Machine Learning  \n
   Training a Neural Network: Weights and Cost Functions
   Types of Neural Networks
   Deep Neural Networks 
