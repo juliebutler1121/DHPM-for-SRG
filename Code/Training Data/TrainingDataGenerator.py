@@ -55,7 +55,7 @@ def Hamiltonian(delta,g):
          [       0.,    -0.5*g,     -0.5*g,     -0.5*g,    -0.5*g, 10*delta-g ]]
         )
 
-        return H
+    return H
 
 # COMMUTATOR
 def commutator(a,b):
@@ -85,25 +85,25 @@ def flow_equation(y, t, dim):
         parameter 
     """
 
-  # reshape the solution vector into a dim x dim matrix
-  H = reshape(y, (dim, dim))
+    # reshape the solution vector into a dim x dim matrix
+    H = reshape(y, (dim, dim))
 
-  # extract diagonal Hamiltonian...
-  Hd  = diag(diag(H))
+    # extract diagonal Hamiltonian...
+    Hd  = diag(diag(H))
 
-  # ... and construct off-diagonal the Hamiltonian
-  Hod = H-Hd
+    # ... and construct off-diagonal the Hamiltonian
+    Hod = H-Hd
 
-  # calculate the generator
-  eta = commutator(Hd, Hod)
+    # calculate the generator
+    eta = commutator(Hd, Hod)
 
-  # dH is the derivative in matrix form 
-  dH  = commutator(eta, H)
+    # dH is the derivative in matrix form 
+    dH  = commutator(eta, H)
 
-  # convert dH into a linear array for the ODE solver
-  dydt = reshape(dH, -1)
+    # convert dH into a linear array for the ODE solver
+    dydt = reshape(dH, -1)
     
-  return dydt
+    return dydt
 
 #################################################
 # MAIN PROGRAM
@@ -126,28 +126,29 @@ eigenvalues = eigvalsh(H0)
 y0  = reshape(H0, -1)                 
 
 # flow parameter step
-ds = 1e-6
+ds = 1e-4
 
 # flow parameters for snapshot images
 flowparams = arange (0, 10, ds)
 
 # GENERATE_DATA
 def generate_data(initial_y, s_values):
-  # integrate flow equations - odeint returns an array of solutions,
-  # which are 1d arrays themselves
-  ys  = odeint(derivative_odeint, initial_y, s_values, args=(dim,))
+    # integrate flow equations - odeint returns an array of solutions,
+    # which are 1d arrays themselves
+    ys  = odeint(flow_equation, initial_y, s_values, args=(dim,))
 
-  # reshape individual solution vectors into dim x dim Hamiltonian
-  # matrices
-  Hs  = reshape(ys, (-1, dim,dim))
+    # reshape individual solution vectors into dim x dim Hamiltonian
+    # matrices
+    Hs  = reshape(ys, (-1, dim,dim))
 
-  return Hs
+    return Hs
     
 
 def main():
+    print ("Generating data")
     Hs = generate_data(y0, flowparams)
-
-    SRG_to_file (Hs)
+    print ("Writing to file")
+    write ("SRG_Training_Data_1_e_-4.txt", flowparams, Hs)
  
 #------------------------------------------------------------------------------
 # make executable
