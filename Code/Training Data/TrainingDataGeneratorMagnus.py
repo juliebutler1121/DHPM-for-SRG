@@ -222,7 +222,7 @@ ds = 1e-4
 flowparams = arange (0, 10, ds)
 
 # threshold to end summation
-threshold = 1e-4
+threshold = 1e-3
 
 def generate_data (flow_parameters, threshold, d, g):
     """
@@ -270,7 +270,7 @@ def main ():
     print ("Generating data")
     Hs_list = generate_data (flowparams, threshold, d, g)
     print ("Writing to file")
-    write ("SRG_Training_Data_Magnus_1_e_-4.txt", flowparams, Hs_list)
+    write ("SRG_Training_Data_Magnus_1_e_-3.txt", flowparams, Hs_list)
 
 
 #------------------------------------------------------------------------------

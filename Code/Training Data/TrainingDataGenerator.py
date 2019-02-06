@@ -126,7 +126,7 @@ eigenvalues = eigvalsh(H0)
 y0  = reshape(H0, -1)                 
 
 # flow parameter step
-ds = 1e-4
+ds = 1e-3
 
 # flow parameters for snapshot images
 flowparams = arange (0, 10, ds)
@@ -148,7 +148,7 @@ def main():
     print ("Generating data")
     Hs = generate_data(y0, flowparams)
     print ("Writing to file")
-    write ("SRG_Training_Data_1_e_-4.txt", flowparams, Hs)
+    write ("SRG_Training_Data_1_e_-3.txt", flowparams, Hs)
  
 #------------------------------------------------------------------------------
 # make executable
