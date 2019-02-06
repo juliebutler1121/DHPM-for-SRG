@@ -31,10 +31,13 @@ from sys import exit
 
 # Third-Party Imports
 import numpy as np
-from numpy import array, dot, diag, reshape
+from numpy import array, dot, diag, reshape, arange
 from scipy.integrate import odeint
+from scipy.linalg import eigvalsh
 
-
+# Local Imports
+from LinearAlgebra import commutator, nested_commutator 
+from MatrixComparisons import compare_square_matrices
 # Writes the solutions to a file in a formatted way
 from ReadAndWriteSRGMatricesToFiles import write 
 
@@ -199,10 +202,10 @@ def magnus_expansion (omega, s, threshold, H0):
 # interaction coefficient
 g     = 0.5
 # energy level spacing 
-delta = 1
+d = 1
 
 # initial Hamiltonian for the given values of g and d
-H0    = Hamiltonian(delta, g)
+H0    =  hamiltonian(d, g)
 # the dimension of one side of the Hamiltonian (its square)
 dim   = H0.shape[0]
 
@@ -213,12 +216,15 @@ eigenvalues = eigvalsh(H0)
 y0  = reshape(H0, -1)                 
 
 # flow parameter step
-ds = 1e-6
+ds = 1e-4
 
 # flow parameters for snapshot images
 flowparams = arange (0, 10, ds)
 
-def main (flow_parameters, threshold, d, g):
+# threshold to end summation
+threshold = 1e-4
+
+def generate_data (flow_parameters, threshold, d, g):
     """
     Calcualtes H(s) from omega(s) by solving for domega/ds.
     Input:
@@ -260,7 +266,18 @@ def main (flow_parameters, threshold, d, g):
     return Hs_list
 	
 
+def main ():
+    print ("Generating data")
+    Hs_list = generate_data (flowparams, threshold, d, g)
+    print ("Writing to file")
+    write ("SRG_Training_Data_Magnus_1_e_-4.txt", flowparams, Hs_list)
 
+
+#------------------------------------------------------------------------------
+# make executable
+#------------------------------------------------------------------------------
+if __name__ == "__main__": 
+  main()
 
 
 
