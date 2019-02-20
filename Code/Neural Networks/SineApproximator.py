@@ -2,7 +2,7 @@
 # SineApproximator.py
 # Julie Butler
 # February 20, 2019
-# Verision 0.1
+# Verision 0.2
 #
 # Approximates the function sin(x) using a one hidden layer neural network with any
 # number of neurons.  In general, as the number of neurons increases, the accuracy
