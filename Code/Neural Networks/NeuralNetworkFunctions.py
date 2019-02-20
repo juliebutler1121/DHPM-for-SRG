@@ -1,3 +1,13 @@
+########################################################################################
+# NeuralNetworkFunctions.py
+# Julie Butler
+# February 20, 2019
+# Version 0.1
+#
+# A collection of functions for setting up and running neural networks.  Many are 
+# related to the use of neural networks as universal function approximators.
+########################################################################################
+
 import tensorflow as tf
 import numpy as np
 
@@ -25,7 +35,8 @@ def xavier_initilization (layer_in, layer_out):
 # UNIVERSAL_FUNCTION_APPROXIMATOR
 def universal_function_approximator_one_hidden_layer (input_vector, input_dim, hidden_dim, output_dim):
     """
-        Approximates any function using a one hidden layer neural network.
+        Approximates any function using a one hidden layer neural network. Weights and 
+        biases are initialized using a Tensorflow initializer.  
         Inputs:
             input_vector (an array or matrix): the input values at which the function is
                 to be calculated.  Can be a one dimensional array if approximating a one
