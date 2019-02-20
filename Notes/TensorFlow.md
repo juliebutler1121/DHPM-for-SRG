@@ -46,3 +46,18 @@ stackabuse.com/tensorflow-neural-network-tutorial
 -Gradient Descent optimizer provided by Tensorflow
 
 adventuresinmacinelearning.com/python-tensorflow-tutorial
+
+# Tensorflow: a universal approximator inside a neural network
+
+-Universal Approximation Theorem
+    -Any continuous function f is defined in R^n
+    -Can find a wide enough 1-hidden layer neural network
+    -that will approximate f to any accuracy on a closed interval
+    
+-Any continsuous function on a compact set (closed interval) can be approximated by a piecewise constant function to any accuracy
+
+-Can build a neural network manually which will be as close as wanted to the piecewise function by adding as many nuerons as necessary
+
+-As the number of neurons increses the approximation gets better
+
+blog.metaflow.fr/tensorflow-howto-a-universal-approximator-inside-a-neural-net-bb034430b71e
