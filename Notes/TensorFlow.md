@@ -14,3 +14,35 @@
 -graph runs inside a session --> placeholders revieve concrete values through the feedback attributr
 
 stackabuse.com/tensorflow-neural-network-tutorial
+
+# Python Tensorflow Tutorial
+
+-Tensors can inder data types --> need to be set for placeholders
+
+-Tensorflow allows calculations to be split up among CPU and GPU
+
+-Tensors are only created when ran --> to run operations between variables need to start a Tensorflow Session
+
+-Tf.Session supplied a dictionary when run to fill placeholders
+
+-Need weights and biases for each layer
+
+## Neural Network Example
+
+-Set up placeholders for training data
+
+-Set up weights and biases for the layers (L-1 for L layers)
+
+-Set up output of hidden layer
+
+        z = xW + b
+            (input vector)*(weights) + biases
+            
+        h = f(z)  --> activation function
+-Do for every layer except input
+
+-Include cost/loss function for optimization
+
+-Gradient Descent optimizer provided by Tensorflow
+
+adventuresinmacinelearning.com/python-tensorflow-tutorial
