@@ -41,3 +41,19 @@ def function_to_approximate (x):
     """  
     return tf.sin (x)
     
+def main (hidden_dim):
+    # Create the Tensorflow computational graph
+    with tf.variable_scope ('Graph'):
+        input_values = tf.placeholder (tf.float32, shape=[None, 1], name='input_values')
+        y_true = function_to_approximate (input_values)
+        y_approximate = ua (input_values, 1, hidden_dim, 1)
+        with tf.variable_scope ('Loss'):
+            loss=tf.reduce_mean (tf.square (y_approximate-y_true))
+            loss_summary_t = tf.summary_scalar ('loss', loss)
+            adam = tf.train.Adamoptimizer (learning_rate = 1e-2)
+            train_optimizer = adam.minimize (loss)
+        
+
+
+if __name__=='__main__':
+    main (200)
