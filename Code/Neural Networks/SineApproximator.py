@@ -31,6 +31,13 @@ from NeuralNetworkFunctions import universal_function_approximator_one_hidden_la
 #                           #
 #############################
 # FUNCTION_TO_APPROXIMATE
-def function_to_approximate (x):  
+def function_to_approximate (x):
+    """
+        Inputs:
+            x (a Tensorflow Variable): the point to calculate the function at
+        Returns:
+            Unnamed (a Tensorflow Variable): the value of sine at the inputted point
+        Calculates sin(x) for a given value of x.
+    """  
     return tf.sin (x)
     

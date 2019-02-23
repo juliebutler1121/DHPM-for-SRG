@@ -2,7 +2,7 @@
 # NeuralNetworkFunctions.py
 # Julie Butler
 # February 20, 2019
-# Version 0.1
+# Version 0.2
 #
 # A collection of functions for setting up and running neural networks.  Many are 
 # related to the use of neural networks as universal function approximators.
@@ -29,6 +29,7 @@ import tensorflow as tf
 # For matrix calculations
 import numpy as np
 
+#INITIALIZE_NEURAL_NETWORK
 def initialize_neural_network (layers):
     """
         Inputs:
@@ -49,7 +50,7 @@ def initialize_neural_network (layers):
     # Calculates weights and biases for each hidden layer and the outout.  len(weights) 
     # is one less than len(layers) (no weights or biases for the input layer)
     for l in range (0, number_of_layers-1):
-        w = xavier_initilization(layers[l], layers[l+1])
+        w = xavier_initialization(layers[l], layers[l+1])
         b = tf.Variable (tf.zeros([1, layers[l+1]]))
 
         weights.append (w)
@@ -57,7 +58,8 @@ def initialize_neural_network (layers):
 
     return weights, biases
 
-def xavier_initilization (layer_in, layer_out):
+#XAVIER_INITIALIZATION
+def xavier_initialization (layer_in, layer_out):
     """
         Inputs:
             layer_in (an int): seed value for the Xavier initialization
