@@ -40,7 +40,7 @@ dir = os.path.dirname (os.path.realpath (__file__))
 # FUNCTIONS                 #
 #                           #
 #############################
-def main (input_dim, hidden_dim, output_dim, num_iterations, training_points, 
+def main (hidden_dim, num_iterations, training_points, 
     learning_rate):
     """
         Inputs:
@@ -57,7 +57,7 @@ def main (input_dim, hidden_dim, output_dim, num_iterations, training_points,
         input_vector = tf.placeholder (tf.float32, shape=[None, 1], name='input_values')
 
         # The actual values of sine at the selected values of x
-        y_true = function_to_approximate (input_vector)
+        input_dim, output_dim, y_true = function_to_approximate (input_vector)
         # The values of sine approximated by the neural network at the selected values
         # of x
         y_approximate = ua (input_vector, input_dim, hidden_dim, output_dim)
@@ -103,4 +103,4 @@ def main (input_dim, hidden_dim, output_dim, num_iterations, training_points,
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (1, 200, 1, 3000, 10000, 1e-2)
+    main (200, 3000, 10000, 1e-2)
