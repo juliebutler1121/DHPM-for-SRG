@@ -19,3 +19,8 @@ def quadratic (x):
     return x**2
 def quadratic_dims ():
     return 1, 1
+
+def test_matrix (x):
+    return np.array([tf.sin(x), 0], [0, tf.cos(x)])
+def test_matrix_dims ():
+    return 1, 2
