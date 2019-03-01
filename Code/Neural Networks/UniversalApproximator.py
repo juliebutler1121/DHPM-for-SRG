@@ -30,7 +30,8 @@ import matplotlib.pyplot as plt
 # Neural network that functions as a function approximator
 from NeuralNetworkFunctions import universal_function_approximator_one_hidden_layer as ua
 # Function to approximate
-from Functions import sine_1d as function_to_approximate
+from Functions import test_vector as function_to_approximate
+from Functions import test_vector_dims as dimensions
 
 # SYSTEM IMPORTS
 import time, os
@@ -49,15 +50,16 @@ def main (hidden_dim, num_iterations, training_points,
             None.
         Trains a neural network of one hidden layer to approxiamate sin(x)
     """
+    input_dim, output_dim = dimensions()
     # Create the Tensorflow computational graph
     with tf.variable_scope ('Graph'):
         # Placeholder for the values of x at which the value of sine will be calculated 
         # at
         # Given values when the Tensorflow session runs
-        input_vector = tf.placeholder (tf.float32, shape=[None, 1], name='input_values')
+        input_vector = tf.placeholder (tf.float32, shape=[None, input_dim], name='input_values')
 
         # The actual values of sine at the selected values of x
-        input_dim, output_dim, y_true = function_to_approximate (input_vector)
+        y_true = function_to_approximate (input_vector)
         # The values of sine approximated by the neural network at the selected values
         # of x
         y_approximate = ua (input_vector, input_dim, hidden_dim, output_dim)
@@ -103,4 +105,4 @@ def main (hidden_dim, num_iterations, training_points,
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (200, 3000, 10000, 1e-2)
+    main (500, 3000, 10000, 1e-2)

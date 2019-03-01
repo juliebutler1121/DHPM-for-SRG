@@ -1,4 +1,21 @@
 import numpy as np
 import tensorflow as tf
-def sine_1d(x):
-    return 1, 1, tf.sin(x)
+def sine_1d (x):
+    return tf.sin(x)
+def sine_1d_dims ():
+    return 1, 1
+
+def sine_3d (coordinates):
+    return tf.sin(coordinates[0])*tf.sin(coordinates[1])*tf.sin(coordinates[2])
+def sine_3d_dims ():
+    return 3, 1
+
+def test_vector (x):
+    return [tf.sin(x), tf.sin(x), tf.sin(x)]
+def test_vector_dims ():
+    return 1, 3
+
+def quadratic (x):
+    return x**2
+def quadratic_dims ():
+    return 1, 1
