@@ -2,15 +2,13 @@
 # SineApproximator.py
 # Julie Butler
 # February 20, 2019
-# Verision 2.0
+# Verision 2.5
 #
 # Approximates the function sin(x) using a one hidden layer neural network with any
 # number of neurons.  In general, as the number of neurons increases, the accuracy
 # of the approximation increases
 #
 # To-Do:
-# Add predicition function
-# Finish Comments
 # Adapt for multi-hidden-layer NN
 #########################################################################################
 
@@ -26,8 +24,9 @@ import tensorflow as tf
 import numpy as np
 # For graphing
 import matplotlib.pyplot as plt
+from pylab import *
 # 
-from math import pi
+from math import sin
 
 # LOCAL IMPORTS
 from NeuralNetworkFunctions import universal_function_approximator_one_hidden_layer as ua
@@ -108,23 +107,61 @@ def main (hidden_dim, training_points, iterations):
             sw.add_summary (loss_summary, i+1)
 
             # Print periodic updates to the terminal
-            if (i+1)%1000 == 0:
+            if (i+1)%250 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
 
         # Using the neural network to predict values of sin(x)
         # The values of x to calculate sine at
-        prediction_values = [[0], [pi/2], [pi]]
+        prediction_values = np.arange (-10, 10, 0.1)
+
+        prediction_values = prediction_values.reshape (len(prediction_values), 1)
 
         # Use the trained neural network to make the predictions
         y_true_results, y_approximate_results = sess.run ([y_true, y_approximate], feed_dict={input_vector:prediction_values})
 
-        # Print the results of the prediction 
-        print (y_true_results)
-        print ("**********")
-        print (y_approximate_results)
+        prediction_values = prediction_values.flatten()
+
+        y_approximate_results = y_approximate_results.flatten()
+
+        print (prediction_values)
+
+        rc ('axes', linewidth=2)
+
+        plot (prediction_values, y_approximate_results, 'b--', linewidth=4, label='NN Results')
+
+        actual_results = np.sin (prediction_values)
+
+        plot (prediction_values, actual_results, 'g', linewidth=4, label='sin(x)')
+
+        fontsize = 12
+
+        ax = gca ()
+
+        for tick in ax.xaxis.get_major_ticks():
+        	tick.label1.set_fontsize (fontsize)
+        	tick.label1.set_fontweight ('bold')
+        for tick in ax.yaxis.get_major_ticks ():
+        	tick.label1.set_fontsize (fontsize)
+        	tick.label1.set_fontweight ('bold')
+
+        xlabel ('X', fontsize=16, fontweight='bold')
+        ylabel ('Y', fontsize=16, fontweight='bold')
+
+        plot_title = 'Iterations: ' + str(iterations) + ', Training Points: ' + str(training_points)
+
+        title (plot_title)
+
+        save_title = 'Graphs/' + str(hidden_dim) + '_' + str(training_points) + '_' + str(iterations) + '.png'
+
+        savefig (save_title)
+
+        legend (fontsize=14)
+
+        show()
+        
     #saver.save (sess, results_folder + '/data.chkp')
             
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (500, 50000, 3000)
+    main (500, 100, 3000)
