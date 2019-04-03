@@ -2,7 +2,7 @@
 # SineApproximator.py
 # Julie Butler
 # February 20, 2019
-# Verision 1.1
+# Verision 2.0
 #
 # Approximates the function sin(x) using a one hidden layer neural network with any
 # number of neurons.  In general, as the number of neurons increases, the accuracy
@@ -26,6 +26,8 @@ import tensorflow as tf
 import numpy as np
 # For graphing
 import matplotlib.pyplot as plt
+# 
+from math import pi
 
 # LOCAL IMPORTS
 from NeuralNetworkFunctions import universal_function_approximator_one_hidden_layer as ua
@@ -94,9 +96,9 @@ def main (hidden_dim):
         # Start the Tensorflow Session
         sess.run (tf.global_variables_initializer ())
         # Train the neural network using 3000 iterations of training data
-        for i in range (3000):
+        for i in range (1000):
             # The actual values that will be put into the placeholder input_vector
-            input_vector_values = np.random.uniform (-10, 10, [100000, 1])
+            input_vector_values = np.random.uniform (-10, 10, [10000, 1])
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                 train_optimizer], feed_dict = {input_vector: input_vector_values})
@@ -106,9 +108,20 @@ def main (hidden_dim):
             # Print periodic updates to the terminal
             if (i+1)%100 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
-#    saver.save (sess, results_folder + '/data.chkp')
+
+        zero_tensor = tf.constant (0, dtype=tf.float32, name='Zero_Tensor')
+        pi_tensor = tf.constant (pi, dtype=tf.float32, name='Pi_Tensor')
+
+        prediction_values = [[0], [pi/2], [pi]]
+
+        y_true_results, y_results = sess.run ([y_true, y_approximate], feed_dict={input_vector:prediction_values})
+
+        print (y_true_results)
+        print ("**********")
+        print (y_results)
+    #saver.save (sess, results_folder + '/data.chkp')
             
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (1000)
+    main (100)
