@@ -51,10 +51,12 @@ def function_to_approximate (x):
     """  
     return tf.sin (x)
     
-def main (hidden_dim):
+def main (hidden_dim, training_points, iterations):
     """
         Inputs:
             hidden_dim (an int): The number of neurons in the hidden layer
+            training_points (an int): The number of training points per iteration
+            iterations (an int): The number of iterations during the training process.
         Returns:
             None.
         Trains a neural network of one hidden layer to approxiamate sin(x)
@@ -96,9 +98,9 @@ def main (hidden_dim):
         # Start the Tensorflow Session
         sess.run (tf.global_variables_initializer ())
         # Train the neural network using 3000 iterations of training data
-        for i in range (1000):
+        for i in range (iterations):
             # The actual values that will be put into the placeholder input_vector
-            input_vector_values = np.random.uniform (-10, 10, [10000, 1])
+            input_vector_values = np.random.uniform (-10, 10, [training_points, 1])
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
                 train_optimizer], feed_dict = {input_vector: input_vector_values})
@@ -106,7 +108,7 @@ def main (hidden_dim):
             sw.add_summary (loss_summary, i+1)
 
             # Print periodic updates to the terminal
-            if (i+1)%100 == 0:
+            if (i+1)%1000 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
 
         # Using the neural network to predict values of sin(x)
@@ -125,4 +127,4 @@ def main (hidden_dim):
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (100)
+    main (500, 50000, 3000)
