@@ -109,16 +109,17 @@ def main (hidden_dim):
             if (i+1)%100 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
 
-        zero_tensor = tf.constant (0, dtype=tf.float32, name='Zero_Tensor')
-        pi_tensor = tf.constant (pi, dtype=tf.float32, name='Pi_Tensor')
-
+        # Using the neural network to predict values of sin(x)
+        # The values of x to calculate sine at
         prediction_values = [[0], [pi/2], [pi]]
 
-        y_true_results, y_results = sess.run ([y_true, y_approximate], feed_dict={input_vector:prediction_values})
+        # Use the trained neural network to make the predictions
+        y_true_results, y_approximate_results = sess.run ([y_true, y_approximate], feed_dict={input_vector:prediction_values})
 
+        # Print the results of the prediction 
         print (y_true_results)
         print ("**********")
-        print (y_results)
+        print (y_approximate_results)
     #saver.save (sess, results_folder + '/data.chkp')
             
 
