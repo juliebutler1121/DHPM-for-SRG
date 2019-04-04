@@ -113,16 +113,6 @@ def main (hidden_dim):
     # which are 1d arrays themselves
     ys  = odeint(derivative, y0, flowparams, args=(dim,))
 
-    for s in flowparams:
-        s - tf.convert_to_tensor (s)
-
-    dictionary = dict (zip (flowparams, ys))
-
-    function = Function(dictionary)
-
-    print (type(function.get_value (4)[0]))
-
-    
 
     # Create the Tensorflow computational graph
     with tf.variable_scope ('Graph'):
@@ -130,9 +120,11 @@ def main (hidden_dim):
         # at
         # Given values when the Tensorflow session runs
         input_vector = tf.placeholder (tf.float64, shape=[None, 1], name='input_values')
+        keys = tf.placeholder (tf.float64, shape=[None, 1], name='keys')
+        dictionary = dict( zip (keys, ys))
 
         # The actual values of sine at the selected values of x
-        y_true = function.get_value (input_vector)
+        y_true = dictionary [input_vector]
         # The values of sine approximated by the neural network at the selected values
         # of x
         y_approximate = ua (input_vector, 1, hidden_dim, 36)
@@ -164,9 +156,10 @@ def main (hidden_dim):
         for i in range (3000):
             # The actual values that will be put into the placeholder input_vector
             input_vector_values = flowparam_values
+            keys_values = flowparam_values
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
-                train_optimizer], feed_dict = {input_vector: input_vector_values})
+                train_optimizer], feed_dict = {input_vector: input_vector_values, keys: keys_values})
 
             sw.add_summary (loss_summary, i+1)
 

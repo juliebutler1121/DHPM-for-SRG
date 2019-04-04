@@ -11,9 +11,11 @@ def sine_3d_dims ():
     return 3, 1
 
 def test_vector (x):
-    return [tf.sin(x), tf.sin(x), tf.sin(x)]
+    test = [0, 1, 2, 3]
+    print(type(tf.to_float(x)))
+    return 4
 def test_vector_dims ():
-    return 1, 3
+    return 1, 1
 
 def quadratic (x):
     return x**2

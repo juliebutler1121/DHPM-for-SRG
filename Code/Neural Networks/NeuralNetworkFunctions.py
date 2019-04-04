@@ -74,7 +74,7 @@ def xavier_initialization (layer_in, layer_out):
     return tf.Variable (tf.truncated_normal([layer_in, layer_out], 
         stddev=xavier_standard_deviation))
     
-# UNIVERSAL_FUNCTION_APPROXIMATOR
+# UNIVERSAL_FUNCTION_APPROXIMATOR_ONE_HIDDEN_LAYER
 def universal_function_approximator_one_hidden_layer (input_vector, input_dim, hidden_dim, output_dim):
     """
         Approximates any function using a one hidden layer neural network. Weights and 
@@ -110,7 +110,85 @@ def universal_function_approximator_one_hidden_layer (input_vector, input_dim, h
             shape=[hidden_dim, output_dim],
             initializer=tf.random_normal_initializer(stddev=0.1))
             
-        # See notebook #1 page ______
+        # See notebook #1 page 22
         z = tf.matmul (activated_function, weights_output_layer)
         
         return z
+
+def universal_function_approximator_N_hidden_layers (input_vector, input_dim, hidden_dim, output_dim, num_hidden_layers):
+    # First Hidden Layer
+    weights_first_hidden_layer = tf.get_variable (name='weights_first_hidden_layer', 
+        shape=[input_dim, hidden_dim],
+        initializer=tf.random_normal_initializer(stddev=0.1))
+        
+    biases_first_hidden_layer = tf.get_variable (name='first_biases_hidden_layer', 
+        shape=[hidden_dim],
+        initializer=tf.constant_initializer(0.0))
+        
+    z = tf.matmul (input_vector, weights_first_hidden_layer) + biases_first_hidden_layer
+    activated_function = tf.nn.relu (z)
+
+    for i in range (0, num_hidden_layers-1):
+        # Interior Hidden Layers
+        weight_name = 'weight_hidden_layer_' + str(i)
+        bias_name = 'bias_hidden_layer_' + str(i)
+
+        weights_hidden_layer_1 = tf.get_variable (name=weight_name, 
+            shape=[hidden_dim, hidden_dim],
+            initializer=tf.random_normal_initializer(stddev=0.1))
+        
+        biases_hidden_layer_1 = tf.get_variable (name=bias_name, 
+            shape=[hidden_dim],
+            initializer=tf.constant_initializer(0.0))
+        
+        z = tf.matmul (activated_function, weights_hidden_layer_1) + biases_hidden_layer_1
+        activated_function = tf.nn.relu (z)
+
+    #Output Layer
+    weights_output_layer = tf.get_variable (name='weights_output_layer', 
+        shape=[hidden_dim, output_dim],
+        initializer=tf.random_normal_initializer(stddev=0.1))
+            
+    # See notebook #1 page 22
+    z = tf.matmul (activated_function, weights_output_layer)
+        
+    return z
+"""
+PANIC VERSION -- WORKS WITH 2 HIDDEN LAYERS
+# UNIVERSAL_FUNCTION_APPROXIMATOR_N_HIDDEN_LAYERS
+def universal_function_approximator_N_hidden_layers (input_vector, input_dim, hidden_dim, output_dim, num_hidden_layers, lower_bound, upper_bound):
+        # First Hidden Layer
+        weights_hidden_layer = tf.get_variable (name='weights_hidden_layer', 
+            shape=[input_dim, hidden_dim],
+            initializer=tf.random_normal_initializer(stddev=0.1))
+        
+        biases_hidden_layer = tf.get_variable (name='biases_hidden_layer', 
+            shape=[hidden_dim],
+            initializer=tf.constant_initializer(0.0))
+        
+        z = tf.matmul (input_vector, weights_hidden_layer) + biases_hidden_layer
+        activated_function = tf.nn.relu (z)
+
+        #Second Hidden Layer
+        weights_hidden_layer_1 = tf.get_variable (name='weights_hidden_layer_1', 
+            shape=[hidden_dim, hidden_dim],
+            initializer=tf.random_normal_initializer(stddev=0.1))
+        
+        biases_hidden_layer_1 = tf.get_variable (name='biases_hidden_layer_1', 
+            shape=[hidden_dim],
+            initializer=tf.constant_initializer(0.0))
+        
+        z = tf.matmul (activated_function, weights_hidden_layer_1) + biases_hidden_layer_1
+        activated_function = tf.nn.relu (z)
+
+        #Output Layer
+        weights_output_layer = tf.get_variable (name='weights_output_layer', 
+            shape=[hidden_dim, output_dim],
+            initializer=tf.random_normal_initializer(stddev=0.1))
+            
+        # See notebook #1 page 22
+        z = tf.matmul (activated_function, weights_output_layer)
+        
+        return z
+"""    
+    

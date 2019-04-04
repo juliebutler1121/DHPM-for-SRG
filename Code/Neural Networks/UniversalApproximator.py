@@ -90,6 +90,7 @@ def main (hidden_dim, num_iterations, training_points,
         # Train the neural network using 3000 iterations of training data
         for i in range (num_iterations):
             # The actual values that will be put into the placeholder input_vector
+            #input_vector_values = [0]           
             input_vector_values = np.random.uniform (-10, 10, [training_points, input_dim])
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 

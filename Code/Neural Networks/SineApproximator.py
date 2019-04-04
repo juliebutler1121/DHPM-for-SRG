@@ -29,7 +29,7 @@ from pylab import *
 from math import sin
 
 # LOCAL IMPORTS
-from NeuralNetworkFunctions import universal_function_approximator_one_hidden_layer as ua
+from NeuralNetworkFunctions import universal_function_approximator_N_hidden_layers as ua
 
 # SYSTEM IMPORTS
 import time, os
@@ -48,9 +48,9 @@ def function_to_approximate (x):
             Unnamed (a Tensorflow Variable): the value of sine at the inputted point
         Calculates sin(x) for a given value of x.
     """  
-    return tf.sin (x)
+    return tf.sin(x)
     
-def main (hidden_dim, training_points, iterations):
+def main (hidden_dim, training_points, iterations, num_hidden_layers):
     """
         Inputs:
             hidden_dim (an int): The number of neurons in the hidden layer
@@ -60,6 +60,8 @@ def main (hidden_dim, training_points, iterations):
             None.
         Trains a neural network of one hidden layer to approxiamate sin(x)
     """
+
+    print ('*************** HIDDEN LAYERS: ', num_hidden_layers, '********************')
     # Create the Tensorflow computational graph
     with tf.variable_scope ('Graph'):
         # Placeholder for the values of x at which the value of sine will be calculated 
@@ -71,11 +73,11 @@ def main (hidden_dim, training_points, iterations):
         y_true = function_to_approximate (input_vector)
         # The values of sine approximated by the neural network at the selected values
         # of x
-        y_approximate = ua (input_vector, 1, hidden_dim, 1)
+        y_approximate = ua (input_vector, 1, hidden_dim, 1, num_hidden_layers)
 
         # Function used to train the neural network
         with tf.variable_scope ('Loss'):
-            # Cost function
+            # Cost function        
             loss=tf.reduce_mean (tf.square (y_approximate-y_true))
             loss_summary_t = tf.summary.scalar ('loss', loss)
 
@@ -107,7 +109,7 @@ def main (hidden_dim, training_points, iterations):
             sw.add_summary (loss_summary, i+1)
 
             # Print periodic updates to the terminal
-            if (i+1)%250 == 0:
+            if (i+1)%100 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
 
         # Using the neural network to predict values of sin(x)
@@ -123,12 +125,10 @@ def main (hidden_dim, training_points, iterations):
 
         y_approximate_results = y_approximate_results.flatten()
 
-        print (prediction_values)
-
         rc ('axes', linewidth=2)
 
         plot (prediction_values, y_approximate_results, 'b--', linewidth=4, label='NN Results')
-
+       
         actual_results = np.sin (prediction_values)
 
         plot (prediction_values, actual_results, 'g', linewidth=4, label='sin(x)')
@@ -147,21 +147,26 @@ def main (hidden_dim, training_points, iterations):
         xlabel ('X', fontsize=16, fontweight='bold')
         ylabel ('Y', fontsize=16, fontweight='bold')
 
-        plot_title = 'Iterations: ' + str(iterations) + ', Training Points: ' + str(training_points)
+        plot_title = 'Iterations: ' + str(iterations) + ', Training Points: ' + str(training_points) + ', Hidden Layers: ' + str(num_hidden_layers)
 
         title (plot_title)
 
-        save_title = 'Graphs/' + str(hidden_dim) + '_' + str(training_points) + '_' + str(iterations) + '.png'
+        save_title = 'Graphs/Multi_Hidden_Layers/' + str(hidden_dim) + '_' + str(training_points) + '_' + str(iterations) + '_' + str(num_hidden_layers)+'.png'
 
         savefig (save_title)
 
         legend (fontsize=14)
 
-        show()
+        print ('************************************************')
+
+        #show()
         
     #saver.save (sess, results_folder + '/data.chkp')
             
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (500, 100, 3000)
+    #main (500, 10000, 3000, 1)
+    main (500, 10000, 3000, 2)
+    #main (500, 10000, 3000, 5)
+    #main (500, 10000, 3000, 10)
