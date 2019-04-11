@@ -187,7 +187,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
 
     # integrate flow equations - odeint returns an array of solutions,
     # which are 1d arrays themselves
-    ys_train  = odeint(srg_flow_equation, y0, flowparams_values_train, args=(dim,))
+    ys_train  = odeint(srg_flow_equation, y0, flowparam_values_train, args=(dim,))
 
     # Create the data to compare to the prediction values
 
@@ -196,7 +196,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
 
     # integrate flow equations - odeint returns an array of solutions,
     # which are 1d arrays themselves
-    ys_predict  = odeint(srg_flow_equation, y0, flowparams_predict, args=(dim,))
+    ys_predict  = odeint(srg_flow_equation, y0, flowparam_values_predict, args=(dim,))
 
     # Neural Network
 
@@ -213,7 +213,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
         # The SRG matrices produced from the odeint solver
         y_true = function_to_approximate (flow_params, SRG_matrices, times)
         # The values of the SRG matrices approximated by the neural network
-        y_approximate = ua (input_vector, 1, hidden_dim, 36, num_hidden_layers)
+        y_approximate = ua (flow_params, 1, hidden_dim, 36, num_hidden_layers)
 
         # Function used to train the neural network
         with tf.variable_scope ('Loss'):
@@ -242,7 +242,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
         for i in range (iterations):
             # The actual values that will be put into the placeholder input_vector
             flow_params_values = flowparam_values_train.reshape (len(flowparam_values_train), 
-                1) + flowparams.reshape (len(flowparams), 1)
+                1) 
             SRG_matrices_values = ys_train
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
@@ -294,8 +294,8 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
         xlabel ('Flow Parameter', fontsize=16, fontweight='bold')
         ylabel ('Difference from ODE Result', fontsize=16, fontweight='bold')
 
-        plot_title = 'Hidden Dim: ' + str(hidden_dim) + ', Iterations: ' + /
-            str(iterations) + ', Times: ' + str(times) + ', Hidden Layers: ' + /
+        plot_title = 'Hidden Dim: ' + str(hidden_dim) + ', Iterations: ' + \
+            str(iterations) + ', Times: ' + str(times) + ', Hidden Layers: ' + \
             str(num_hidden_layers)
 
         title (plot_title)
@@ -305,7 +305,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
         mag_differences = []
         for i in range (len (ys1)):
             mag_differences.append (np.linalg.norm (ys_predict[i]) - 
-                np.linalg.norm(y_approximate_results[i])/times
+                np.linalg.norm(y_approximate_results[i])/times)
 
         # Find the average absolute difference between the odeint results and the 
         # prediction results
@@ -316,8 +316,8 @@ def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict
 
        
         # Save the generated plot
-        save_title = 'Graphs/SRG/' + str(hidden_dim) + '_' + str(times) + /
-            '_' + str(iterations) + '_' + str(num_hidden_layers) + '_' /
+        save_title = 'Graphs/SRG/' + str(hidden_dim) + '_' + str(times) + \
+            '_' + str(iterations) + '_' + str(num_hidden_layers) + '_' + \
             str(random.randint(0, 100)) + '.png'
 
         savefig (save_title)
