@@ -59,7 +59,7 @@ def Hamiltonian(delta,g):
             level spacing and the interaction strength
     """
 
-  H = array(
+    H = array(
       [[2*delta-g,    -0.5*g,     -0.5*g,     -0.5*g,    -0.5*g,          0.],
        [   -0.5*g, 4*delta-g,     -0.5*g,     -0.5*g,        0.,     -0.5*g ], 
        [   -0.5*g,    -0.5*g,  6*delta-g,         0.,    -0.5*g,     -0.5*g ], 
@@ -67,8 +67,8 @@ def Hamiltonian(delta,g):
        [   -0.5*g,        0.,     -0.5*g,     -0.5*g, 8*delta-g,     -0.5*g ], 
        [       0.,    -0.5*g,     -0.5*g,     -0.5*g,    -0.5*g, 10*delta-g ]]
     )
-
-  return H
+ 
+    return H
 
 # COMMUTATOR
 def commutator(a,b):
@@ -81,56 +81,96 @@ def commutator(a,b):
         [a,b] = ab - ba
         The order of the arguments is important
     """
-  return dot(a,b) - dot(b,a)
+    return dot(a,b) - dot(b,a)
 
 # SRG_FLOW_EQUATION
-def srg_flow_equation(y, t, dim):
+def srg_flow_equation(y, s, dim):
     """
         Inputs:
-
+            y (an array):  the current value of the Hamiltonian
+            s (an array): the flow parameters values at which the SRG flow equation is
+                to be solved at
+            dim (an int): the dimension of one side of the square SRG matrix
         Returns:
+            Unnamed (): the results from solving the SRG flow equation
+        Solves the SRG flow equation at given values of the flow parameter.
+        Taken from the code srg_pairing.py by H. Hergert
     """
  
-  # reshape the solution vector into a dim x dim matrix
-  H = reshape(y, (dim, dim))
+    # reshape the solution vector into a dim x dim matrix
+    H = reshape(y, (dim, dim))
 
-  # extract diagonal Hamiltonian...
-  Hd  = diag(diag(H))
+    # extract diagonal Hamiltonian...
+    Hd  = diag(diag(H))
 
-  # ... and construct off-diagonal the Hamiltonian
-  Hod = H-Hd
+    # ... and construct off-diagonal the Hamiltonian
+    Hod = H-Hd
 
-  # calculate the generator
-  eta = commutator(Hd, Hod)
+    # calculate the generator
+    eta = commutator(Hd, Hod)
 
-  # dH is the derivative in matrix form 
-  dH  = commutator(eta, H)
+    # dH is the derivative in matrix form 
+    dH  = commutator(eta, H)
 
-  # convert dH into a linear array for the ODE solver
-  dydt = reshape(dH, -1)
+    # convert dH into a linear array for the ODE solver
+    dydt = reshape(dH, -1)
     
-  return dydt
+    return dydt
 
 # FUNCTION_TO_APPROXIMATE
-def function_to_approximate (input_vector, output_vector, times):
-    if times == 1:
-        return output_vector
-    else:
-        return_output_vector = output_vector
-        for i in range(times-1):
-            return_output_vector = return_output_vector + output_vector
+def function_to_approximate (flow_parameters, SRG_matrices, times):
+    """
+        Inputs:
+            flow_parameters (a 2D-array): the flow parameters at which SRG matrices are
+                to be calculated.  Each inner array is simply a number, a single flow
+                parameter.
+            SRG_matrices (a 2D-array): SRG matrices for the 
+                given flow parameters. Each inner array is 36 numbers long; they are
+                flattened SRG matrices.
+            times (an int): the number of times the training data is to be fed through 
+                the neural network in a given iteration
 
-        return return_output_vector
+        Returns:
+            SRG_matrices or return_SRG_matrices (a 2D-array): SRG matrices for the 
+                given flow parameters. Each inner array is 36 numbers long; they are
+                flattened SRG matrices. If times = 1 then it is just the SRG matrices.
+                If times is greater than 1 then it is the SRG matrices concatentated the
+                given number of times.
+        Returns the SRG matrices to train the neural network for the given flow parameter
+        values.  The order and length of the flow parameters array must match the order
+        and length of the SRG_matrices array.
+    """        
+    if times == 1:
+        return SRG_matrices
+    else:
+        return_SRG_matrices = SRG_matrices
+        for i in range(times-1):
+            return_SRG_matrices = return_SRG_matrices + SRG_matrices
+
+        return return_SRG_matrices
 
     
-def main (hidden_dim, iterations, times, num_hidden_layers):
+def main (hidden_dim, iterations, times, num_hidden_layers, ds_train, ds_predict):
     """
         Inputs:
             hidden_dim (an int): The number of neurons in the hidden layer
+            iterations (an int): The number of training iteratons for the neural 
+                network
+            times (an int): The number of times the training data will be fed through
+                the neural network in a given iteration
+            num_hidden_layers (an int): The number of hidden layers
+            ds_train (a float): The flow parameter step for the training data
+            ds_predict (a float): The flow parameter step for the predictions
         Returns:
             None.
-        Trains a neural network of one hidden layer to approxiamate sin(x)
+        Trains a neural network to approximate the SRG flow equation.  The neural network
+        is trained with data produced from the ODE solver odeint.  The neural network   
+        can have any number of hidden layers and any number of neurons per hidden layer
+        but the number of neurons per hidden layer must be the same for each hidden layer.
     """
+    # Pairing model set-up code taken from srg_pairing.py by H. Hergert
+
+    # The intial Hamiltonian
     H0    = Hamiltonian(0.5, 1)
     dim   = H0.shape[0]
 
@@ -140,38 +180,39 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
     # turn initial Hamiltonian into a linear array
     y0  = reshape(H0, -1)                 
 
+    # Create the training data
+
     # flow parameters for snapshot images
-    flowparam_values = np.arange (0, 10, 0.1)
-    flowparams = flowparam_values
+    flowparam_values_train = np.arange (0, 10, ds_train)
 
     # integrate flow equations - odeint returns an array of solutions,
     # which are 1d arrays themselves
-    ys  = odeint(srg_flow_equation, y0, flowparams, args=(dim,))
+    ys_train  = odeint(srg_flow_equation, y0, flowparams_values_train, args=(dim,))
+
+    # Create the data to compare to the prediction values
 
     # flow parameters for snapshot images
-    flowparam_values1 = np.arange (0, 10, 0.01)
-    flowparams1 = flowparam_values1
+    flowparam_values_predict = np.arange (0, 10, ds_predict)
 
     # integrate flow equations - odeint returns an array of solutions,
     # which are 1d arrays themselves
-    ys1  = odeint(srg_flow_equation, y0, flowparams1, args=(dim,))
+    ys_predict  = odeint(srg_flow_equation, y0, flowparams_predict, args=(dim,))
 
+    # Neural Network
 
-
-
-      # Create the Tensorflow computational graph
+    # Create the Tensorflow computational graph
     with tf.variable_scope ('Graph'):
-        # Placeholder for the values of x at which the value of sine will be calculated 
-        # at
+        # Placeholder for the values of s at which SRG matrices will be calculated
         # Given values when the Tensorflow session runs
-        input_vector = tf.placeholder (tf.float32, shape=[None, 1], name='input_values')
+        flow_params = tf.placeholder (tf.float32, shape=[None, 1], name='s_values')
 
-        output_vector = tf.placeholder (tf.float32, shape=[None, 36], name='reference_values')
+        # Placeholder for the SRG matrices
+        # Given values when the Tensorflow session runs
+        SRG_matrices = tf.placeholder (tf.float32, shape=[None, 36], name='SRG_matrices')
 
-        # The actual values of sine at the selected values of x
-        y_true = function_to_approximate (input_vector, output_vector, times)
-        # The values of sine approximated by the neural network at the selected values
-        # of x
+        # The SRG matrices produced from the odeint solver
+        y_true = function_to_approximate (flow_params, SRG_matrices, times)
+        # The values of the SRG matrices approximated by the neural network
         y_approximate = ua (input_vector, 1, hidden_dim, 36, num_hidden_layers)
 
         # Function used to train the neural network
@@ -190,7 +231,7 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
     # Tensorflow Session (what acutally runs the neural network)
     with tf.Session() as sess:
         # Where to store the results of the neural network (currently not implemented)
-        results_folder = dir + '/results/sinapprox_' + str(int(time.time()))
+        results_folder = dir + '/results/srgapprox_' + str(int(time.time()))
         sw = tf.summary.FileWriter (results_folder, sess.graph)
         
         # Training the neural network
@@ -200,11 +241,13 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
         # Train the neural network using 3000 iterations of training data
         for i in range (iterations):
             # The actual values that will be put into the placeholder input_vector
-            input_vector_values = flowparams.reshape (len(flowparams), 1) + flowparams.reshape (len(flowparams), 1)
-            output_vector_values = ys
+            flow_params_values = flowparam_values_train.reshape (len(flowparam_values_train), 
+                1) + flowparams.reshape (len(flowparams), 1)
+            SRG_matrices_values = ys_train
             # Runs the Tensorflow session
             current_loss, loss_summary, _ = sess.run ([loss, loss_summary_t, 
-                train_optimizer], feed_dict = {input_vector: input_vector_values, output_vector: output_vector_values})
+                train_optimizer], feed_dict = { flow_params: flow_params_values,
+                 SRG_matrices: SRG_matrices_values})
 
             sw.add_summary (loss_summary, i+1)
 
@@ -212,52 +255,30 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
             if (i+1)%250 == 0:
                 print ('iteration: %d, loss: %f' % (i+1, current_loss))
 
-        # Using the neural network to predict values of sin(x)
-        # The values of x to calculate sine at
-        prediction_values = np.arange (0, 10, 0.01)
+        # Using the neural network to predict values of the SRG flow equation
+
+        # The values of s to calculate matrices at
+        prediction_values = np.arange (0, 10, ds_predict)
+        prediction_values = prediction_values.reshape (len(prediction_values), 1)
+
+        # Dummy variable for prediction algorithm        
         dummy_output = [[0,0,0,0,0,0,
                          0,0,0,0,0,0,
                          0,0,0,0,0,0,
                          0,0,0,0,0,0,
                          0,0,0,0,0,0,
                          0,0,0,0,0,0]]
-
-
-        #print (dummy_output)
-
-        prediction_values = prediction_values.reshape (len(prediction_values), 1)
-
-
-
+     
         # Use the trained neural network to make the predictions
-        y_true_results, y_approximate_results = sess.run ([y_true, y_approximate], feed_dict={input_vector:prediction_values, output_vector:dummy_output})
+        y_true_results, y_approximate_results = sess.run ([y_true, y_approximate], 
+            feed_dict={input_vector:prediction_values, output_vector:dummy_output})
 
+        # Reshape for graphing
         prediction_values = prediction_values.flatten()
 
- 
-        #print (len (prediction_values), len (y_approximate_results))
+        # Graphing
         
         rc ('axes', linewidth=2)
-
-        mag_y_approx = []
-
-        for i in range (len (y_approximate_results)):
-            #print (i)
-            mag_y_approx.append (np.linalg.norm (y_approximate_results[i])/times)
-
-        #print (len (prediction_values), len (mag_y_approx))     
-
-        mag_ys = []
-
-        for i in range (len (ys1)):
-            mag_ys.append (np.linalg.norm (ys1[i]) - mag_y_approx[i])
-
-        print ("AVERAGE DIFFERENCE: ", np.mean (np.abs(mag_ys)))
-
-           
-        plot (prediction_values, mag_ys, 'b--', linewidth=4, label = 'NN')
-        #plot (flowparams1, mag_ys, 'g', linewidth=4, label='SRG')
-        
 
         fontsize = 12
 
@@ -273,15 +294,33 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
         xlabel ('Flow Parameter', fontsize=16, fontweight='bold')
         ylabel ('Difference from ODE Result', fontsize=16, fontweight='bold')
 
-        plot_title = 'Hidden Dim: ' + str(hidden_dim) + ', Iterations: ' + str(iterations) + ', Times: ' + str(times) + ', Hidden Layers: ' + str(num_hidden_layers)
+        plot_title = 'Hidden Dim: ' + str(hidden_dim) + ', Iterations: ' + /
+            str(iterations) + ', Times: ' + str(times) + ', Hidden Layers: ' + /
+            str(num_hidden_layers)
 
         title (plot_title)
 
-        save_title = 'Graphs/SRG' + str(hidden_dim) + '_' + str(times) +  '_' + str(iterations) + '_' + str(num_hidden_layers) + str(random.randint(0, 100)) + '.png'
+        # Calculated the difference between the odeint results and the prediction results
+        # for each generated SRG matrix
+        mag_differences = []
+        for i in range (len (ys1)):
+            mag_differences.append (np.linalg.norm (ys_predict[i]) - 
+                np.linalg.norm(y_approximate_results[i])/times
+
+        # Find the average absolute difference between the odeint results and the 
+        # prediction results
+        print ("AVERAGE DIFFERENCE: ", np.mean (np.abs(mag_ys)))
+
+        # Plot the differences against the flow paramter vlaues
+        plot (prediction_values, mag_differences, 'b--', linewidth=4)      
+
+       
+        # Save the generated plot
+        save_title = 'Graphs/SRG/' + str(hidden_dim) + '_' + str(times) + /
+            '_' + str(iterations) + '_' + str(num_hidden_layers) + '_' /
+            str(random.randint(0, 100)) + '.png'
 
         savefig (save_title)
-
-        legend (fontsize=14)
 
         #show()
         
@@ -290,7 +329,8 @@ def main (hidden_dim, iterations, times, num_hidden_layers):
 
 # Runs when the program is called
 if __name__=='__main__':
-    main (1000, 3000, 10, 5)
+    main (hidden_dim=1000, iterations=3000, times=10, num_hidden_layers=5, 
+        ds_train=0.1, ds_predict=0.01)
 
 
 
